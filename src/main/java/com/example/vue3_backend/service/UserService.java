@@ -25,8 +25,38 @@ public interface UserService {
     void deleteUser(Long id);
 
     // 用户登录 - 支持手机号、邮箱或用户名，需验证级别
-    Optional<User> loginWithIdentifier(String identifier, String password, User.Level level);
+    LoginResult loginWithIdentifier(String identifier, String password, User.Level level);
 
     // 根据级别查询
     List<User> findByLevel(User.Level level);
+    
+    class LoginResult {
+        private final boolean success;
+        private final String code;
+        private final String message;
+        private final User user;
+        
+        public LoginResult(boolean success, String code, String message, User user) {
+            this.success = success;
+            this.code = code;
+            this.message = message;
+            this.user = user;
+        }
+        
+        public boolean isSuccess() {
+            return success;
+        }
+        
+        public String getCode() {
+            return code;
+        }
+        
+        public String getMessage() {
+            return message;
+        }
+        
+        public Optional<User> getUser() {
+            return Optional.ofNullable(user);
+        }
+    }
 }

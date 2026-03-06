@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<User> loginWithIdentifier(String identifier, String password, User.Level level) {
+    public UserService.LoginResult loginWithIdentifier(String identifier, String password, User.Level level) {
         Optional<User> userOpt;
         
         if (identifier.matches("\\d{11}")) {
@@ -84,12 +84,19 @@ public class UserServiceImpl implements UserService {
         
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            if (user.getPassword().equals(password) && user.getLevel() == level) {
-                return Optional.of(user);
+            
+            if (!user.getPassword().equals(password)) {
+                return new UserService.LoginResult(false, "PASSWORD_ERROR", "密码错误", null);
             }
+            
+            if (user.getLevel() != level) {
+                return new UserService.LoginResult(false, "LEVEL_MISMATCH", "用户级别与账号不匹配，当前账号级别：" + user.getLevel(), null);
+            }
+            
+            return new UserService.LoginResult(true, "SUCCESS", "登录成功", user);
         }
         
-        return Optional.empty();
+        return new UserService.LoginResult(false, "USER_NOT_FOUND", "账号不存在", null);
     }
 
     @Override

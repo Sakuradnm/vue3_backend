@@ -152,15 +152,23 @@ public class UserController {
         
         try {
             User.Level level = User.Level.valueOf(levelStr.toLowerCase());
-            Optional<User> userOpt = userService.loginWithIdentifier(username, password, level);
+            UserService.LoginResult loginResult = userService.loginWithIdentifier(username, password, level);
             
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
+            if (loginResult.isSuccess()) {
+                User user = loginResult.getUser().get();
                 System.out.println("登录成功 - 用户：" + user.getUsername() + ", 级别：" + user.getLevel());
-                return ResponseEntity.ok(Result.success("登录成功", user));
+                return ResponseEntity.ok(Result.success(loginResult.getMessage(), user));
             } else {
-                System.out.println("登录失败 - 未找到匹配的用户");
-                return ResponseEntity.ok(Result.error(401, "账号、密码或级别不匹配"));
+                System.out.println("登录失败 - " + loginResult.getCode() + ": " + loginResult.getMessage());
+                
+                int statusCode = switch (loginResult.getCode()) {
+                    case "PASSWORD_ERROR" -> 401;
+                    case "LEVEL_MISMATCH" -> 403;
+                    case "USER_NOT_FOUND" -> 404;
+                    default -> 400;
+                };
+                
+                return ResponseEntity.ok(Result.error(statusCode, loginResult.getMessage()));
             }
         } catch (IllegalArgumentException e) {
             System.out.println("无效的级别参数：" + levelStr);
@@ -168,7 +176,7 @@ public class UserController {
         } catch (Exception e) {
             System.out.println("登录异常：" + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.ok(Result.error(401, e.getMessage()));
+            return ResponseEntity.ok(Result.error(500, "登录失败，请稍后重试"));
         }
     }
 
