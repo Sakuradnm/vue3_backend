@@ -34,6 +34,25 @@ public class User {
     @Column(name = "level", nullable = false)
     private Level level;
 
+    @Column(name = "avatar_url", length = 255)
+    private String avatarUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", nullable = false)
+    private Gender gender = Gender.other;
+
+    @Column(name = "birthday")
+    private java.time.LocalDate birthday;
+
+    @Column(name = "bio", length = 50)
+    private String bio;
+
+    @Column(name = "location", length = 50)
+    private String location;
+
+    @Column(name = "nickname", length = 50)
+    private String nickname;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -53,5 +72,9 @@ public class User {
 
     public enum Level {
         student, teacher, admin
+    }
+
+    public enum Gender {
+        male, female, other
     }
 }

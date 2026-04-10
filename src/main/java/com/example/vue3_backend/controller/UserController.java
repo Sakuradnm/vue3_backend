@@ -107,7 +107,29 @@ public class UserController {
             @PathVariable Long id,
             @RequestBody User user) {
         try {
-            User updatedUser = userService.updateUser(id, user);
+            User existingUser = userService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("用户不存在"));
+
+            if (user.getNickname() != null) {
+                existingUser.setNickname(user.getNickname());
+            }
+            if (user.getGender() != null) {
+                existingUser.setGender(user.getGender());
+            }
+            if (user.getBirthday() != null) {
+                existingUser.setBirthday(user.getBirthday());
+            }
+            if (user.getLocation() != null) {
+                existingUser.setLocation(user.getLocation());
+            }
+            if (user.getBio() != null) {
+                existingUser.setBio(user.getBio());
+            }
+            if (user.getAvatarUrl() != null) {
+                existingUser.setAvatarUrl(user.getAvatarUrl());
+            }
+
+            User updatedUser = userService.updateUser(id, existingUser);
             return ResponseEntity.ok(Result.success("更新成功", updatedUser));
         } catch (Exception e) {
             return ResponseEntity.ok(Result.error(400, e.getMessage()));
@@ -189,6 +211,57 @@ public class UserController {
             return ResponseEntity.ok(Result.success(users));
         } catch (Exception e) {
             return ResponseEntity.ok(Result.error(400, "无效的用户级别"));
+        }
+    }
+
+    // 上传头像
+    @PostMapping("/{id}/avatar")
+    public ResponseEntity<Result<Map<String, String>>> uploadAvatar(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> data) {
+        try {
+            String avatarUrl = data.get("avatarUrl");
+            if (avatarUrl == null || avatarUrl.trim().isEmpty()) {
+                return ResponseEntity.ok(Result.error(400, "头像URL不能为空"));
+            }
+
+            User user = userService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("用户不存在"));
+            user.setAvatarUrl(avatarUrl);
+            userService.updateUser(id, user);
+
+            return ResponseEntity.ok(Result.success("头像更新成功", Map.of("avatarUrl", avatarUrl)));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Result.error(400, e.getMessage()));
+        }
+    }
+
+    // 修改密码
+    @PutMapping("/{id}/password")
+    public ResponseEntity<Result<Void>> updatePassword(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> passwordData) {
+        try {
+            User user = userService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("用户不存在"));
+
+            String oldPassword = passwordData.get("oldPassword");
+            String newPassword = passwordData.get("newPassword");
+
+            if (!user.getPassword().equals(oldPassword)) {
+                return ResponseEntity.ok(Result.error("原密码错误"));
+            }
+
+            if (newPassword == null || newPassword.length() < 6) {
+                return ResponseEntity.ok(Result.error("新密码长度至少为6位"));
+            }
+
+            user.setPassword(newPassword);
+            userService.updateUser(id, user);
+
+            return ResponseEntity.ok(Result.success("密码修改成功", null));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Result.error(e.getMessage()));
         }
     }
 }

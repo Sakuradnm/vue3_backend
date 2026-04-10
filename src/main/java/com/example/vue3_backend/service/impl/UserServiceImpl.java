@@ -55,11 +55,39 @@ public class UserServiceImpl implements UserService {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
 
-        existingUser.setUsername(user.getUsername());
-        existingUser.setPhone(user.getPhone());
-        existingUser.setEmail(user.getEmail());
-        existingUser.setPassword(user.getPassword());
-        existingUser.setLevel(user.getLevel());
+        if (user.getUsername() != null) {
+            existingUser.setUsername(user.getUsername());
+        }
+        if (user.getPhone() != null) {
+            existingUser.setPhone(user.getPhone());
+        }
+        if (user.getEmail() != null) {
+            existingUser.setEmail(user.getEmail());
+        }
+        if (user.getPassword() != null) {
+            existingUser.setPassword(user.getPassword());
+        }
+        if (user.getLevel() != null) {
+            existingUser.setLevel(user.getLevel());
+        }
+        if (user.getNickname() != null) {
+            existingUser.setNickname(user.getNickname());
+        }
+        if (user.getGender() != null) {
+            existingUser.setGender(user.getGender());
+        }
+        if (user.getBirthday() != null) {
+            existingUser.setBirthday(user.getBirthday());
+        }
+        if (user.getLocation() != null) {
+            existingUser.setLocation(user.getLocation());
+        }
+        if (user.getBio() != null) {
+            existingUser.setBio(user.getBio());
+        }
+        if (user.getAvatarUrl() != null) {
+            existingUser.setAvatarUrl(user.getAvatarUrl());
+        }
 
         return userRepository.save(existingUser);
     }
