@@ -19,26 +19,24 @@ public class ForumPost {
     @Column(name = "id")
     private Integer id;
 
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
+
     @Column(name = "category", length = 20, nullable = false)
     private String category;
 
     @Column(name = "category_label", length = 20, nullable = false)
     private String categoryLabel;
 
-    @Column(name = "title", length = 200, nullable = false)
+    @Column(name = "title", length = 30, nullable = false)
     private String title;
 
-    @Column(name = "preview", columnDefinition = "TEXT")
+    @Column(name = "preview", length = 200, nullable = false)
     private String preview;
-
-    @Column(name = "author", length = 50, nullable = false)
-    private String author;
-
-    @Column(name = "avatar", length = 10)
-    private String avatar;
-
-    @Column(name = "avatar_color", length = 7)
-    private String avatarColor;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

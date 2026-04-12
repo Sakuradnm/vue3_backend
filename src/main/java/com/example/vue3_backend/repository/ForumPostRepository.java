@@ -10,14 +10,15 @@ import java.util.List;
 @Repository
 public interface ForumPostRepository extends JpaRepository<ForumPost, Integer> {
 
-    List<ForumPost> findByCategory(String category);
+    @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user WHERE f.category = :category")
+    List<ForumPost> findByCategory(@Param("category") String category);
 
-    @Query("SELECT f FROM ForumPost f WHERE f.category = :category OR :category IS NULL ORDER BY f.pinned DESC, f.score DESC")
+    @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user WHERE f.category = :category OR :category IS NULL ORDER BY f.pinned DESC, f.score DESC")
     List<ForumPost> findByCategoryOrderByPinnedAndScore(@Param("category") String category);
 
-    @Query("SELECT f FROM ForumPost f WHERE (:category IS NULL OR f.category = :category) AND (LOWER(f.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(f.preview) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY f.pinned DESC, f.score DESC")
+    @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user WHERE (:category IS NULL OR f.category = :category) AND (LOWER(f.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(f.preview) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY f.pinned DESC, f.score DESC")
     List<ForumPost> searchPosts(@Param("category") String category, @Param("keyword") String keyword);
 
-    @Query("SELECT f FROM ForumPost f ORDER BY f.pinned DESC, f.score DESC")
+    @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user ORDER BY f.pinned DESC, f.score DESC")
     List<ForumPost> findAllOrderByPinnedAndScore();
 }

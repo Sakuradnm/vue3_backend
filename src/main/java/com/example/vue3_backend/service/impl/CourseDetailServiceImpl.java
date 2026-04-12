@@ -32,6 +32,7 @@ public class CourseDetailServiceImpl implements CourseDetailService {
         dto.setCourseware(courseDetail.getCourseware());
         dto.setTeacher(courseDetail.getTeacher());
         dto.setTotalDuration(courseDetail.getTotalDuration());
+        dto.setDetailIntro(courseDetail.getDetailIntro());
 
         if (courseDetail.getCourse() != null) {
             dto.setCourseDescription(courseDetail.getCourse().getDescription());

@@ -21,6 +21,8 @@ public class CourseDetailDTO {
     private Integer learnedDuration;
     private Integer totalDuration;
 
+    private String detailIntro;
+
     // 关联的课程信息
     private String courseDescription;
     private Integer subCategoryId;

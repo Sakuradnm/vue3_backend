@@ -47,6 +47,9 @@ public class CourseDetail {
     @Column(name = "total_duration")
     private Integer totalDuration = 0;
 
+    @Column(name = "detail_intro", columnDefinition = "LONGTEXT")
+    private String detailIntro;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

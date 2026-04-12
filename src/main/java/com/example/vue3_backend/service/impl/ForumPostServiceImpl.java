@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -86,9 +87,16 @@ public class ForumPostServiceImpl implements ForumPostService {
         detailDTO.setTitle(post.getTitle());
         detailDTO.setPreview(post.getPreview());
         detailDTO.setContent(contentOpt.map(ForumPostContent::getContent).orElse(""));
-        detailDTO.setAuthor(post.getAuthor());
-        detailDTO.setAvatar(post.getAvatar());
-        detailDTO.setAvatarColor(post.getAvatarColor());
+        
+        // 从关联的 User 实体获取作者信息
+        if (post.getUser() != null) {
+            detailDTO.setAuthor(post.getUser().getNickname() != null ? post.getUser().getNickname() : post.getUser().getUsername());
+            detailDTO.setAvatar(post.getUser().getAvatarUrl());
+        } else {
+            detailDTO.setAuthor("未知用户");
+            detailDTO.setAvatar(null);
+        }
+        
         detailDTO.setCreatedAt(formatDateTime(post.getCreatedAt()));
         detailDTO.setViews(post.getViews());
         detailDTO.setLikes(post.getLikes());
@@ -139,6 +147,51 @@ public class ForumPostServiceImpl implements ForumPostService {
         });
     }
 
+    @Override
+    @Transactional
+    public ForumPostDTO createPost(Map<String, Object> postData) {
+        // 创建帖子实体
+        ForumPost post = new ForumPost();
+        post.setUserId((Integer) postData.get("userId"));
+        post.setCategory((String) postData.get("category"));
+        post.setCategoryLabel((String) postData.get("categoryLabel"));
+        post.setTitle((String) postData.get("title"));
+        post.setPreview((String) postData.get("preview"));
+        
+        // 处理标签
+        try {
+            if (postData.get("tags") != null) {
+                post.setTags(objectMapper.writeValueAsString(postData.get("tags")));
+            } else {
+                post.setTags("[]");
+            }
+        } catch (Exception e) {
+            post.setTags("[]");
+        }
+        
+        post.setPinned(false);
+        post.setSolved(false);
+        post.setHot(false);
+        post.setScore(0);
+        post.setViews(0);
+        post.setLikes(0);
+        post.setComments(0);
+        
+        // 保存帖子
+        ForumPost savedPost = forumPostRepository.save(post);
+        
+        // 如果有内容，保存到 forum_post_contents 表
+        if (postData.get("content") != null && !((String) postData.get("content")).isEmpty()) {
+            ForumPostContent content = new ForumPostContent();
+            content.setPostId(savedPost.getId());
+            content.setContent((String) postData.get("content"));
+            forumPostContentRepository.save(content);
+        }
+        
+        // 转换为 DTO 并返回
+        return convertToDTO(savedPost);
+    }
+
     private ForumPostDTO convertToDTO(ForumPost post) {
         ForumPostDTO dto = new ForumPostDTO();
         dto.setId(post.getId());
@@ -146,9 +199,16 @@ public class ForumPostServiceImpl implements ForumPostService {
         dto.setCategoryLabel(post.getCategoryLabel());
         dto.setTitle(post.getTitle());
         dto.setPreview(post.getPreview());
-        dto.setAuthor(post.getAuthor());
-        dto.setAvatar(post.getAvatar());
-        dto.setAvatarColor(post.getAvatarColor());
+        
+        // 从关联的 User 实体获取作者信息
+        if (post.getUser() != null) {
+            dto.setAuthor(post.getUser().getNickname() != null ? post.getUser().getNickname() : post.getUser().getUsername());
+            dto.setAvatar(post.getUser().getAvatarUrl());
+        } else {
+            dto.setAuthor("未知用户");
+            dto.setAvatar(null);
+        }
+        
         dto.setCreatedAt(post.getCreatedAt());
         dto.setViews(post.getViews());
         dto.setLikes(post.getLikes());
@@ -177,19 +237,27 @@ public class ForumPostServiceImpl implements ForumPostService {
             return "未知时间";
         }
 
-        Duration duration = Duration.between(dateTime, LocalDateTime.now());
+        // 使用北京时间（UTC+8）计算时间差
+        LocalDateTime now = LocalDateTime.now(java.time.ZoneId.of("Asia/Shanghai"));
+        Duration duration = Duration.between(dateTime, now);
         long seconds = duration.getSeconds();
+
+        // 处理未来时间（如果服务器时间比数据库时间早）
+        if (seconds < 0) {
+            return "刚刚";
+        }
 
         if (seconds < 60) {
             return "刚刚";
         } else if (seconds < 3600) {
-            return (seconds / 60) + "分钟前";
+            long minutes = seconds / 60;
+            return minutes + "分钟前";
         } else if (seconds < 86400) {
-            return (seconds / 3600) + "小时前";
-        } else if (seconds < 2592000) {
-            return (seconds / 86400) + "天前";
+            long hours = seconds / 3600;
+            return hours + "小时前";
         } else {
-            return dateTime.getMonthValue() + "个月前";
+            long days = seconds / 86400;
+            return days + "天前";
         }
     }
 

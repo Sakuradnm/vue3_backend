@@ -15,9 +15,8 @@ public class ForumPostDetailDTO {
     private String title;
     private String preview;
     private String content;
-    private String author;
-    private String avatar;
-    private String avatarColor;
+    private String author; // 用户昵称
+    private String avatar; // 用户头像URL
     private String createdAt;
     private Integer views;
     private Integer likes;

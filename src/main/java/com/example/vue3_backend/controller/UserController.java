@@ -147,58 +147,66 @@ public class UserController {
         }
     }
 
-    // 用户登录 - 支持手机号、邮箱或用户名登录，需指定用户级别
+    // 用户登录 - 支持手机号、邮箱或用户名登录,需指定用户级别
     @PostMapping("/login")
     public ResponseEntity<Result<User>> login(
             @RequestBody Map<String, String> loginData) {
-
+    
         String levelStr = loginData.get("level");
-        String username = loginData.get("username");
         String password = loginData.get("password");
-        
-        System.out.println("=== 登录请求 ===");
-        System.out.println("标识符：" + username);
-        System.out.println("级别：" + levelStr);
-        
-        if (username == null || username.trim().isEmpty()) {
-            return ResponseEntity.ok(Result.error(400, "标识符不能为空"));
+            
+        // 支持 username/phone/email 三种标识符,优先级: phone > email > username
+        String identifier = loginData.get("phone");
+        if (identifier == null || identifier.trim().isEmpty()) {
+            identifier = loginData.get("email");
         }
-        
+        if (identifier == null || identifier.trim().isEmpty()) {
+            identifier = loginData.get("username");
+        }
+            
+        System.out.println("=== 登录请求 ===");
+        System.out.println("标识符:" + identifier);
+        System.out.println("级别:" + levelStr);
+            
+        if (identifier == null || identifier.trim().isEmpty()) {
+            return ResponseEntity.ok(Result.error(400, "用户名/手机号/邮箱不能为空"));
+        }
+            
         if (password == null || password.trim().isEmpty()) {
             return ResponseEntity.ok(Result.error(400, "密码不能为空"));
         }
-        
+            
         if (levelStr == null || levelStr.trim().isEmpty()) {
             return ResponseEntity.ok(Result.error(400, "用户级别不能为空"));
         }
-        
+            
         try {
             User.Level level = User.Level.valueOf(levelStr.toLowerCase());
-            UserService.LoginResult loginResult = userService.loginWithIdentifier(username, password, level);
-            
+            UserService.LoginResult loginResult = userService.loginWithIdentifier(identifier, password, level);
+                
             if (loginResult.isSuccess()) {
                 User user = loginResult.getUser().get();
-                System.out.println("登录成功 - 用户：" + user.getUsername() + ", 级别：" + user.getLevel());
+                System.out.println("登录成功 - 用户:" + user.getUsername() + ", 级别:" + user.getLevel());
                 return ResponseEntity.ok(Result.success(loginResult.getMessage(), user));
             } else {
                 System.out.println("登录失败 - " + loginResult.getCode() + ": " + loginResult.getMessage());
-                
+                    
                 int statusCode = switch (loginResult.getCode()) {
                     case "PASSWORD_ERROR" -> 401;
                     case "LEVEL_MISMATCH" -> 403;
                     case "USER_NOT_FOUND" -> 404;
                     default -> 400;
                 };
-                
+                    
                 return ResponseEntity.ok(Result.error(statusCode, loginResult.getMessage()));
             }
         } catch (IllegalArgumentException e) {
-            System.out.println("无效的级别参数：" + levelStr);
-            return ResponseEntity.ok(Result.error(400, "无效的用户级别，应为 student 或 teacher"));
+            System.out.println("无效的级别参数:" + levelStr);
+            return ResponseEntity.ok(Result.error(400, "无效的用户级别,应为 student 或 teacher"));
         } catch (Exception e) {
-            System.out.println("登录异常：" + e.getMessage());
+            System.out.println("登录异常:" + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.ok(Result.error(500, "登录失败，请稍后重试"));
+            return ResponseEntity.ok(Result.error(500, "登录失败,请稍后重试"));
         }
     }
 

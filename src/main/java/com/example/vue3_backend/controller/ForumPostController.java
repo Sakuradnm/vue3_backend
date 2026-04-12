@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -32,6 +33,16 @@ public class ForumPostController {
         Optional<ForumPostDetailDTO> post = forumPostService.getPostById(id);
         return post.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/posts")
+    public ResponseEntity<ForumPostDTO> createPost(@RequestBody Map<String, Object> postData) {
+        try {
+            ForumPostDTO createdPost = forumPostService.createPost(postData);
+            return ResponseEntity.ok(createdPost);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/posts/{id}/like")
