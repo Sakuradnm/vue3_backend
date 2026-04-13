@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ForumPostRepository extends JpaRepository<ForumPost, Integer> {
@@ -21,4 +22,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPost, Integer> {
 
     @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user ORDER BY f.pinned DESC, f.score DESC")
     List<ForumPost> findAllOrderByPinnedAndScore();
+
+    @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user WHERE f.id = :id")
+    Optional<ForumPost> findByIdWithUser(@Param("id") Integer id);
 }

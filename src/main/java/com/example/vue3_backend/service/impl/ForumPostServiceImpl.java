@@ -72,7 +72,7 @@ public class ForumPostServiceImpl implements ForumPostService {
 
     @Override
     public Optional<ForumPostDetailDTO> getPostById(Integer id) {
-        Optional<ForumPost> postOpt = forumPostRepository.findById(id);
+        Optional<ForumPost> postOpt = forumPostRepository.findByIdWithUser(id);
         if (postOpt.isEmpty()) {
             return Optional.empty();
         }
