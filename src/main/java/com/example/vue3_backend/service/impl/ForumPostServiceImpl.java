@@ -4,8 +4,10 @@ import com.example.vue3_backend.dto.ForumPostDTO;
 import com.example.vue3_backend.dto.ForumPostDetailDTO;
 import com.example.vue3_backend.entity.ForumPost;
 import com.example.vue3_backend.entity.ForumPostContent;
+import com.example.vue3_backend.entity.ForumPostLike;
 import com.example.vue3_backend.repository.ForumPostRepository;
 import com.example.vue3_backend.repository.ForumPostContentRepository;
+import com.example.vue3_backend.repository.ForumPostLikeRepository;
 import com.example.vue3_backend.service.ForumPostService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +32,9 @@ public class ForumPostServiceImpl implements ForumPostService {
 
     @Autowired
     private ForumPostContentRepository forumPostContentRepository;
+
+    @Autowired
+    private ForumPostLikeRepository forumPostLikeRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -72,7 +77,7 @@ public class ForumPostServiceImpl implements ForumPostService {
 
     @Override
     public Optional<ForumPostDetailDTO> getPostById(Integer id) {
-        Optional<ForumPost> postOpt = forumPostRepository.findById(id);
+        Optional<ForumPost> postOpt = forumPostRepository.findByIdWithUser(id);
         if (postOpt.isEmpty()) {
             return Optional.empty();
         }
@@ -82,8 +87,9 @@ public class ForumPostServiceImpl implements ForumPostService {
 
         ForumPostDetailDTO detailDTO = new ForumPostDetailDTO();
         detailDTO.setId(post.getId());
+        detailDTO.setUserId(post.getUserId());  // 设置帖子所有者ID
         detailDTO.setCategory(post.getCategory());
-        detailDTO.setCategoryLabel(post.getCategoryLabel());
+        detailDTO.setCategoryLabel(post.getCategory()); // category 和 categoryLabel 使用相同值
         detailDTO.setTitle(post.getTitle());
         detailDTO.setPreview(post.getPreview());
         detailDTO.setContent(contentOpt.map(ForumPostContent::getContent).orElse(""));
@@ -149,12 +155,90 @@ public class ForumPostServiceImpl implements ForumPostService {
 
     @Override
     @Transactional
+    public void decrementComments(Integer id) {
+        forumPostRepository.findById(id).ifPresent(post -> {
+            post.setComments(Math.max(0, post.getComments() - 1));
+            forumPostRepository.save(post);
+        });
+    }
+
+    @Override
+    @Transactional
+    public boolean toggleLikePost(Integer postId, Integer userId, String action) {
+        Optional<ForumPost> postOpt = forumPostRepository.findById(postId);
+        
+        if (postOpt.isEmpty()) {
+            return false;
+        }
+        
+        ForumPost post = postOpt.get();
+        Optional<ForumPostLike> existingLike = forumPostLikeRepository.findByPostIdAndUserId(postId, userId);
+        
+        if ("like".equals(action)) {
+            // 点赞：如果已点赞则不重复添加
+            if (existingLike.isPresent()) {
+                return true; // 已经点过赞了，直接返回true
+            }
+            
+            // 创建新的点赞记录
+            ForumPostLike like = new ForumPostLike(postId, userId);
+            forumPostLikeRepository.save(like);
+            
+            // 更新帖子点赞数
+            post.setLikes(post.getLikes() + 1);
+            post.setScore(post.getScore() + 1);
+            forumPostRepository.save(post);
+            return true;
+            
+        } else if ("unlike".equals(action)) {
+            // 取消点赞：如果未点赞则不做操作
+            if (existingLike.isEmpty()) {
+                return false; // 没有点过赞，直接返回false
+            }
+            
+            // 删除点赞记录
+            forumPostLikeRepository.deleteByPostIdAndUserId(postId, userId);
+            
+            // 更新帖子点赞数
+            post.setLikes(Math.max(0, post.getLikes() - 1));
+            post.setScore(Math.max(0, post.getScore() - 1));
+            forumPostRepository.save(post);
+            return false;
+            
+        } else {
+            // toggle: 切换模式
+            if (existingLike.isPresent()) {
+                // 已点赞，取消点赞
+                forumPostLikeRepository.deleteByPostIdAndUserId(postId, userId);
+                post.setLikes(Math.max(0, post.getLikes() - 1));
+                post.setScore(Math.max(0, post.getScore() - 1));
+                forumPostRepository.save(post);
+                return false;
+            } else {
+                // 未点赞，添加点赞
+                ForumPostLike like = new ForumPostLike(postId, userId);
+                forumPostLikeRepository.save(like);
+                post.setLikes(post.getLikes() + 1);
+                post.setScore(post.getScore() + 1);
+                forumPostRepository.save(post);
+                return true;
+            }
+        }
+    }
+
+    @Override
+    public boolean isPostLiked(Integer postId, Integer userId) {
+        Optional<ForumPostLike> like = forumPostLikeRepository.findByPostIdAndUserId(postId, userId);
+        return like.isPresent();
+    }
+
+    @Override
+    @Transactional
     public ForumPostDTO createPost(Map<String, Object> postData) {
         // 创建帖子实体
         ForumPost post = new ForumPost();
         post.setUserId((Integer) postData.get("userId"));
         post.setCategory((String) postData.get("category"));
-        post.setCategoryLabel((String) postData.get("categoryLabel"));
         post.setTitle((String) postData.get("title"));
         post.setPreview((String) postData.get("preview"));
         
@@ -196,7 +280,7 @@ public class ForumPostServiceImpl implements ForumPostService {
         ForumPostDTO dto = new ForumPostDTO();
         dto.setId(post.getId());
         dto.setCategory(post.getCategory());
-        dto.setCategoryLabel(post.getCategoryLabel());
+        dto.setCategoryLabel(post.getCategory()); // category 和 categoryLabel 使用相同值
         dto.setTitle(post.getTitle());
         dto.setPreview(post.getPreview());
         

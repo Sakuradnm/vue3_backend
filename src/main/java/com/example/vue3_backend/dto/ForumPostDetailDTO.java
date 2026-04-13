@@ -10,9 +10,11 @@ import java.util.List;
 @AllArgsConstructor
 public class ForumPostDetailDTO {
     private Integer id;
+    private Integer userId;  // 帖子所有者ID
     private String category;
     private String categoryLabel;
     private String title;
+    private String subtitle;
     private String preview;
     private String content;
     private String author; // 用户昵称

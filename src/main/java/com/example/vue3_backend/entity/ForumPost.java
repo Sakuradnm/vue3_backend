@@ -29,11 +29,11 @@ public class ForumPost {
     @Column(name = "category", length = 20, nullable = false)
     private String category;
 
-    @Column(name = "category_label", length = 20, nullable = false)
-    private String categoryLabel;
-
     @Column(name = "title", length = 30, nullable = false)
     private String title;
+
+    @Column(name = "subtitle", length = 200)
+    private String subtitle;
 
     @Column(name = "preview", length = 200, nullable = false)
     private String preview;

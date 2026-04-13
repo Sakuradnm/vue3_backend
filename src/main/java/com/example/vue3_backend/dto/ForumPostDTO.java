@@ -14,6 +14,7 @@ public class ForumPostDTO {
     private String category;
     private String categoryLabel;
     private String title;
+    private String subtitle;
     private String preview;
     private String author; // 用户昵称
     private String avatar; // 用户头像URL

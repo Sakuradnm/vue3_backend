@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/forum")
+@RequestMapping("/api")
 public class ForumPostController {
 
     @Autowired
@@ -46,9 +46,47 @@ public class ForumPostController {
     }
 
     @PostMapping("/posts/{id}/like")
-    public ResponseEntity<Void> likePost(@PathVariable Integer id) {
-        forumPostService.incrementLikes(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, Object>> likePost(@PathVariable Integer id, @RequestBody Map<String, Object> likeData) {
+        try {
+            // 检查 userId 是否存在
+            if (!likeData.containsKey("userId") || likeData.get("userId") == null) {
+                Map<String, Object> errorResponse = new java.util.HashMap<>();
+                errorResponse.put("error", "缺少用户ID");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            Integer userId = Integer.valueOf(likeData.get("userId").toString());
+            String action = likeData.containsKey("action") ? (String) likeData.get("action") : "toggle";
+            boolean liked = forumPostService.toggleLikePost(id, userId, action);
+            
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("liked", liked);
+            return ResponseEntity.ok(response);
+        } catch (NumberFormatException e) {
+            Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("error", "用户ID格式错误");
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("error", "操作失败: " + e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    @GetMapping("/posts/{id}/like-status")
+    public ResponseEntity<Map<String, Object>> getLikeStatus(@PathVariable Integer id, @RequestParam Integer userId) {
+        try {
+            boolean liked = forumPostService.isPostLiked(id, userId);
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("liked", liked);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("error", "获取点赞状态失败: " + e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 
     @PostMapping("/posts/{id}/comment")
