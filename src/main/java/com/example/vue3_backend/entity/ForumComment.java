@@ -36,7 +36,6 @@ public class ForumComment {
     @Column(name = "parent_id", nullable = false)
     private Integer parentId = 0;
 
-    @Column(name = "content", columnDefinition = "LONGTEXT", nullable = false)
     private String content;
 
     @Column(name = "likes")

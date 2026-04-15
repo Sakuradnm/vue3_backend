@@ -11,7 +11,6 @@ import java.util.List;
 public class ForumCommentDTO {
     private Integer id;
     private Integer postId;
-    private Integer userId;
     private String username;
     private String avatar;
     private Integer parentId;
