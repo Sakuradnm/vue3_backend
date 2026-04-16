@@ -3,6 +3,7 @@ package com.example.vue3_backend.service.impl;
 import com.example.vue3_backend.entity.User;
 import com.example.vue3_backend.repository.UserRepository;
 import com.example.vue3_backend.service.UserService;
+import com.example.vue3_backend.service.StatisticsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private StatisticsService statisticsService;
 
     @Override
     @Transactional(readOnly = true)
@@ -47,7 +51,12 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("手机号已注册，请使用其他手机号或直接登录");
         }
         
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        
+        // 更新用户总数统计
+        statisticsService.updateUserCount();
+        
+        return savedUser;
     }
 
     @Override
@@ -95,6 +104,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
+        // 更新用户总数统计
+        statisticsService.updateUserCount();
     }
 
     @Override

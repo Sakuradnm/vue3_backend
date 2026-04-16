@@ -10,5 +10,9 @@ public interface ForumCommentService {
 
     ForumCommentDTO createComment(Map<String, Object> commentData);
 
-    void likeComment(Integer id);
+    boolean toggleLikeComment(Integer commentId, Long userId, String action);
+
+    boolean isCommentLiked(Integer commentId, Long userId);
+
+    void deleteComment(Integer commentId, Long currentUserId);
 }

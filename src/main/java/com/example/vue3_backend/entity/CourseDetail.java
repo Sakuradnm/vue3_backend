@@ -29,26 +29,23 @@ public class CourseDetail {
     @Column(name = "overview", length = 500)
     private String overview;
 
-    @Column(name = "comment", length = 100)
-    private String comment;
+    @Column(name = "introduction", columnDefinition = "TEXT")
+    private String introduction;
 
-    @Column(name = "rating", precision = 2, scale = 1)
-    private BigDecimal rating = BigDecimal.ZERO;
+    @Column(name = "learning_objectives", columnDefinition = "TEXT")
+    private String learningObjectives;
 
-    @Column(name = "syllabus", columnDefinition = "LONGTEXT")
-    private String syllabus;
+    @Column(name = "main_content", columnDefinition = "TEXT")
+    private String mainContent;
 
-    @Column(name = "courseware", columnDefinition = "LONGTEXT")
-    private String courseware;
+    @Column(name = "target_audience", length = 500)
+    private String targetAudience;
 
-    @Column(name = "teacher", length = 100)
-    private String teacher;
+    @Column(name = "teaching_features", columnDefinition = "TEXT")
+    private String teachingFeatures;
 
-    @Column(name = "total_duration")
-    private Integer totalDuration = 0;
-
-    @Column(name = "detail_intro", columnDefinition = "LONGTEXT")
-    private String detailIntro;
+    @Column(name = "instructor", length = 200)
+    private String instructor;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

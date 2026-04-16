@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "course_chapters3")
-public class ChapterResource {
+@Table(name = "course_chapters1")
+public class CourseChapter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,28 +19,11 @@ public class ChapterResource {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chapter_id", nullable = false)
-    private CourseChapter chapter;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "section_id", nullable = false)
-    private CourseSection section;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @Column(name = "resource_type", length = 20, nullable = false)
-    private String resourceType;
-
     @Column(name = "title", length = 200, nullable = false)
     private String title;
-
-    @Column(name = "resource_url", columnDefinition = "TEXT", nullable = false)
-    private String resourceUrl;
-
-    @Column(name = "duration")
-    private Integer duration = 0;
 
     @Column(name = "sort_order")
     private Integer sortOrder = 0;

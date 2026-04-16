@@ -9,6 +9,7 @@ import com.example.vue3_backend.repository.ForumPostRepository;
 import com.example.vue3_backend.repository.ForumPostContentRepository;
 import com.example.vue3_backend.repository.ForumPostLikeRepository;
 import com.example.vue3_backend.service.ForumPostService;
+import com.example.vue3_backend.service.StatisticsService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public class ForumPostServiceImpl implements ForumPostService {
 
     @Autowired
     private ForumPostLikeRepository forumPostLikeRepository;
+
+    @Autowired
+    private StatisticsService statisticsService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -89,7 +93,7 @@ public class ForumPostServiceImpl implements ForumPostService {
         detailDTO.setId(post.getId());
         detailDTO.setUserId(post.getUserId());  // 设置帖子所有者ID
         detailDTO.setCategory(post.getCategory());
-        detailDTO.setCategoryLabel(post.getCategory()); // category 和 categoryLabel 使用相同值
+        detailDTO.setCategoryLabel(post.getCategory());
         detailDTO.setTitle(post.getTitle());
         detailDTO.setPreview(post.getPreview());
         detailDTO.setContent(contentOpt.map(ForumPostContent::getContent).orElse(""));
@@ -107,8 +111,6 @@ public class ForumPostServiceImpl implements ForumPostService {
         detailDTO.setViews(post.getViews());
         detailDTO.setLikes(post.getLikes());
         detailDTO.setComments(post.getComments());
-        detailDTO.setPinned(post.getPinned());
-        detailDTO.setSolved(post.getSolved());
         detailDTO.setHot(post.getHot());
         detailDTO.setScore(post.getScore());
 
@@ -253,16 +255,15 @@ public class ForumPostServiceImpl implements ForumPostService {
             post.setTags("[]");
         }
         
-        post.setPinned(false);
-        post.setSolved(false);
         post.setHot(false);
         post.setScore(0);
         post.setViews(0);
-        post.setLikes(0);
-        post.setComments(0);
-        
+
         // 保存帖子
         ForumPost savedPost = forumPostRepository.save(post);
+        
+        // 更新发帖总数统计
+        statisticsService.updatePostCount();
         
         // 如果有内容，保存到 forum_post_contents 表
         if (postData.get("content") != null && !((String) postData.get("content")).isEmpty()) {
@@ -280,7 +281,7 @@ public class ForumPostServiceImpl implements ForumPostService {
         ForumPostDTO dto = new ForumPostDTO();
         dto.setId(post.getId());
         dto.setCategory(post.getCategory());
-        dto.setCategoryLabel(post.getCategory()); // category 和 categoryLabel 使用相同值
+        dto.setCategoryLabel(post.getCategory());
         dto.setTitle(post.getTitle());
         dto.setPreview(post.getPreview());
         
@@ -297,8 +298,6 @@ public class ForumPostServiceImpl implements ForumPostService {
         dto.setViews(post.getViews());
         dto.setLikes(post.getLikes());
         dto.setComments(post.getComments());
-        dto.setPinned(post.getPinned());
-        dto.setSolved(post.getSolved());
         dto.setHot(post.getHot());
         dto.setScore(post.getScore());
         dto.setTimeAgo(calculateTimeAgo(post.getCreatedAt()));

@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "sub_categories")
+@Table(name = "categories2")
 @JsonIgnoreProperties({"category"})
 public class SubCategory {
 

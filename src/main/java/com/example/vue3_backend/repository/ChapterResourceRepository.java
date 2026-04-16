@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface ChapterResourceRepository extends JpaRepository<ChapterResource, Integer> {
 
-    @Query("SELECT cr FROM ChapterResource cr LEFT JOIN FETCH cr.outline WHERE cr.outline.id IN :outlineIds ORDER BY cr.sortOrder ASC")
-    List<ChapterResource> findByOutlineIds(@Param("outlineIds") List<Integer> outlineIds);
+    @Query("SELECT cr FROM ChapterResource cr LEFT JOIN FETCH cr.section WHERE cr.section.id IN :sectionIds ORDER BY cr.sortOrder ASC")
+    List<ChapterResource> findBySectionIds(@Param("sectionIds") List<Integer> sectionIds);
 }

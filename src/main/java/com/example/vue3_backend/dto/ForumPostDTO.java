@@ -14,17 +14,14 @@ public class ForumPostDTO {
     private String category;
     private String categoryLabel;
     private String title;
-    private String subtitle;
     private String preview;
-    private String author; // 用户昵称
-    private String avatar; // 用户头像URL
+    private String author;
+    private String avatar;
     private LocalDateTime createdAt;
     private Integer views;
     private Integer likes;
     private Integer comments;
     private List<String> tags;
-    private Boolean pinned;
-    private Boolean solved;
     private Boolean hot;
     private Integer score;
     private String timeAgo;

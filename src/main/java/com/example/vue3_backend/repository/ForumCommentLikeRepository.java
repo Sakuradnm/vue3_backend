@@ -11,4 +11,6 @@ public interface ForumCommentLikeRepository extends JpaRepository<ForumCommentLi
     Optional<ForumCommentLike> findByCommentIdAndUserId(Integer commentId, Long userId);
     
     void deleteByCommentIdAndUserId(Integer commentId, Long userId);
+
+    void deleteByCommentId(Integer commentId);
 }

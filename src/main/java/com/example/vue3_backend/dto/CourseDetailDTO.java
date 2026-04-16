@@ -13,15 +13,14 @@ public class CourseDetailDTO {
     private Integer courseId;
     private String courseName;
     private String overview;
-    private String comment;
-    private BigDecimal rating;
-    private String syllabus;
-    private String courseware;
-    private String teacher;
-    private Integer learnedDuration;
-    private Integer totalDuration;
-
-    private String detailIntro;
+    
+    // 新增字段
+    private String introduction;
+    private String learningObjectives;
+    private String mainContent;
+    private String targetAudience;
+    private String teachingFeatures;
+    private String instructor;
 
     // 关联的课程信息
     private String courseDescription;

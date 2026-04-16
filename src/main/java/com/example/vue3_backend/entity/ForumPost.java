@@ -32,9 +32,6 @@ public class ForumPost {
     @Column(name = "title", length = 30, nullable = false)
     private String title;
 
-    @Column(name = "subtitle", length = 200)
-    private String subtitle;
-
     @Column(name = "preview", length = 200, nullable = false)
     private String preview;
 
@@ -53,12 +50,6 @@ public class ForumPost {
 
     @Column(name = "tags", columnDefinition = "JSON")
     private String tags;
-
-    @Column(name = "pinned")
-    private Boolean pinned = false;
-
-    @Column(name = "solved")
-    private Boolean solved = false;
 
     @Column(name = "hot")
     private Boolean hot = false;

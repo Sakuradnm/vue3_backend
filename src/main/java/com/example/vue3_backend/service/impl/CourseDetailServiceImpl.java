@@ -26,13 +26,14 @@ public class CourseDetailServiceImpl implements CourseDetailService {
         dto.setCourseId(courseDetail.getCourse().getId());
         dto.setCourseName(courseDetail.getCourseName());
         dto.setOverview(courseDetail.getOverview());
-        dto.setComment(courseDetail.getComment());
-        dto.setRating(courseDetail.getRating());
-        dto.setSyllabus(courseDetail.getSyllabus());
-        dto.setCourseware(courseDetail.getCourseware());
-        dto.setTeacher(courseDetail.getTeacher());
-        dto.setTotalDuration(courseDetail.getTotalDuration());
-        dto.setDetailIntro(courseDetail.getDetailIntro());
+        
+        // 设置新字段
+        dto.setIntroduction(courseDetail.getIntroduction());
+        dto.setLearningObjectives(courseDetail.getLearningObjectives());
+        dto.setMainContent(courseDetail.getMainContent());
+        dto.setTargetAudience(courseDetail.getTargetAudience());
+        dto.setTeachingFeatures(courseDetail.getTeachingFeatures());
+        dto.setInstructor(courseDetail.getInstructor());
 
         if (courseDetail.getCourse() != null) {
             dto.setCourseDescription(courseDetail.getCourse().getDescription());

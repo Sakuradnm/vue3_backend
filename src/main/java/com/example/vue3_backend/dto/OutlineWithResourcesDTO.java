@@ -14,7 +14,18 @@ public class OutlineWithResourcesDTO {
     private Integer parentId;
     private String title;
     private Integer sortOrder;
-    private List<ResourceDTO> resources;
+    private List<SectionDTO> sections;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SectionDTO {
+        private Integer id;
+        private Integer chapterId;
+        private String title;
+        private Integer sortOrder;
+        private List<ResourceDTO> resources;
+    }
 
     @Data
     @NoArgsConstructor
@@ -25,7 +36,6 @@ public class OutlineWithResourcesDTO {
         private String title;
         private String resourceUrl;
         private Integer duration;
-        private Long fileSize;
         private Integer sortOrder;
     }
 }
