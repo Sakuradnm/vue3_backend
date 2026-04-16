@@ -19,4 +19,9 @@ public interface ForumCommentRepository extends JpaRepository<ForumComment, Inte
 
     @Query("SELECT c FROM ForumComment c LEFT JOIN FETCH c.user WHERE c.id = :id")
     Optional<ForumComment> findByIdWithUser(@Param("id") Integer id);
+
+    @Query("SELECT c FROM ForumComment c WHERE c.postId = :postId AND c.userId = :userId")
+    List<ForumComment> findByPostIdAndUserId(@Param("postId") Integer postId, @Param("userId") Long userId);
+
+    void deleteByParentId(Integer parentId);
 }

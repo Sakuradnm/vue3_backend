@@ -14,18 +14,15 @@ public class ForumPostDetailDTO {
     private String category;
     private String categoryLabel;
     private String title;
-    private String subtitle;
     private String preview;
     private String content;
-    private String author; // 用户昵称
-    private String avatar; // 用户头像URL
+    private String author;
+    private String avatar;
     private String createdAt;
     private Integer views;
     private Integer likes;
     private Integer comments;
     private List<String> tags;
-    private Boolean pinned;
-    private Boolean solved;
     private Boolean hot;
     private Integer score;
 }
