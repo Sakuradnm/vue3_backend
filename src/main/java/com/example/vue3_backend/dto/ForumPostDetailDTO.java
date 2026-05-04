@@ -16,6 +16,7 @@ public class ForumPostDetailDTO {
     private String title;
     private String preview;
     private String content;
+    private String attachments; // 附件信息JSON数组
     private String author;
     private String avatar;
     private String createdAt;
@@ -23,6 +24,4 @@ public class ForumPostDetailDTO {
     private Integer likes;
     private Integer comments;
     private List<String> tags;
-    private Boolean hot;
-    private Integer score;
 }

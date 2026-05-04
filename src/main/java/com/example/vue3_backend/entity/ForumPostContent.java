@@ -22,4 +22,7 @@ public class ForumPostContent {
 
     @Column(name = "content", columnDefinition = "LONGTEXT")
     private String content;
+    
+    @Column(name = "attachments", columnDefinition = "JSON")
+    private String attachments; // 存储附件信息的JSON数组
 }

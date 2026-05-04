@@ -15,4 +15,6 @@ public interface ForumCommentService {
     boolean isCommentLiked(Integer commentId, Long userId);
 
     void deleteComment(Integer commentId, Long currentUserId);
+    
+    ForumCommentDTO getCommentById(Integer commentId);
 }

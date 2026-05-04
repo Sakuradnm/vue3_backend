@@ -22,7 +22,5 @@ public class ForumPostDTO {
     private Integer likes;
     private Integer comments;
     private List<String> tags;
-    private Boolean hot;
-    private Integer score;
     private String timeAgo;
 }

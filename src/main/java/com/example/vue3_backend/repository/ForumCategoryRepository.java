@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface ForumCategoryRepository extends JpaRepository<ForumCategory, Integer> {
     List<ForumCategory> findAllByOrderBySortOrderAsc();
-    Optional<ForumCategory> findByLabel(String label);
+    Optional<ForumCategory> findByName(String name);
 }

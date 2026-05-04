@@ -14,14 +14,14 @@ public interface ForumPostRepository extends JpaRepository<ForumPost, Integer> {
     @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user WHERE f.category = :category")
     List<ForumPost> findByCategory(@Param("category") String category);
 
-    @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user WHERE f.category = :category OR :category IS NULL ORDER BY f.score DESC")
+    @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user WHERE f.category = :category OR :category IS NULL ORDER BY f.views DESC")
     List<ForumPost> findByCategoryOrderByPinnedAndScore(@Param("category") String category);
 
-    @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user WHERE (:category IS NULL OR f.category = :category) AND (LOWER(f.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(f.preview) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY f.score DESC")
+    @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user WHERE (:category IS NULL OR f.category = :category) AND (LOWER(f.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(f.preview) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY f.views DESC")
     List<ForumPost> searchPosts(@Param("category") String category, @Param("keyword") String keyword);
 
-    @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user ORDER BY f.score DESC")
-    List<ForumPost> findAllOrderByPinnedAndScore();
+    @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user ORDER BY f.createdAt DESC")
+    List<ForumPost> findAllOrderByPinnedAndCreatedAt();
 
     @Query("SELECT f FROM ForumPost f LEFT JOIN FETCH f.user WHERE f.id = :id")
     Optional<ForumPost> findByIdWithUser(@Param("id") Integer id);

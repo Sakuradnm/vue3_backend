@@ -53,6 +53,10 @@ public class User {
     @Column(name = "nickname", length = 50)
     private String nickname;
 
+    // 用户状态: 0-正常, 1-停用
+    @Column(name = "status")
+    private Integer status = 0;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

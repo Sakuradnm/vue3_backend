@@ -34,8 +34,10 @@ public class OutlineWithResourcesDTO {
         private Integer id;
         private String resourceType;
         private String title;
+        // fileName字段已从数据库中删除
         private String resourceUrl;
         private Integer duration;
+        // fileSize字段已从数据库中删除
         private Integer sortOrder;
     }
 }

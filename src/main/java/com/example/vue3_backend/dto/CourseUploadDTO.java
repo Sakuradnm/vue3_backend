@@ -10,7 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 public class CourseUploadDTO {
     private String title;
-    private String level;
     private String description;
     private Integer subCategoryId;
     private Integer categoryId;
@@ -41,7 +40,7 @@ public class CourseUploadDTO {
         private String title;
         private String duration;
         private String resourceUrl;
-        private String fileName;
+        // fileName字段已从数据库中删除
     }
 
     @Data
@@ -49,8 +48,8 @@ public class CourseUploadDTO {
     @AllArgsConstructor
     public static class FileDTO {
         private String title;
-        private String fileName;
+        // fileName字段已从数据库中删除
         private String resourceUrl;
-        private Long fileSize;
+        // fileSize字段已从数据库中删除
     }
 }

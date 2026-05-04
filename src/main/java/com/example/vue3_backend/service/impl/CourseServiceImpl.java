@@ -67,6 +67,18 @@ public class CourseServiceImpl implements CourseService {
             dto.setDescription(course.getDescription());
             dto.setSortOrder(course.getSortOrder());
             dto.setSubCategoryId(course.getSubCategory().getId());
+            
+            // 从 Course 中直接获取 status
+            dto.setStatus(course.getStatus() != null ? course.getStatus() : 0);
+            
+            // 设置统计字段
+            dto.setRatingAvg(course.getRatingAvg() != null ? course.getRatingAvg() : 0.0);
+            dto.setRatingCount(course.getRatingCount() != null ? course.getRatingCount() : 0);
+            dto.setChapterCount(course.getChapterCount() != null ? course.getChapterCount() : 0);
+            dto.setVideoCount(course.getVideoCount() != null ? course.getVideoCount() : 0);
+            dto.setTotalSections(course.getTotalSections() != null ? course.getTotalSections() : 0);
+            dto.setStudentsCount(course.getStudentsCount() != null ? course.getStudentsCount() : 0);
+            
             return dto;
         }).collect(Collectors.toList());
     }
@@ -84,8 +96,8 @@ public class CourseServiceImpl implements CourseService {
         course.setSortOrder(0);
         course = courseRepository.save(course);
 
-        // 更新课程总数统计
-        statisticsService.updateCourseCount();
+        // TODO: 更新课程总数统计（需要 statistics_overview 表）
+        // statisticsService.updateCourseCount();
 
         CourseDetail detail = new CourseDetail();
         detail.setCourse(course);
@@ -116,7 +128,6 @@ public class CourseServiceImpl implements CourseService {
                         // 创建小节
                         CourseSection section = new CourseSection();
                         section.setChapter(chapter);
-                        section.setCourse(course);
                         section.setTitle(videoDTO.getTitle());
                         section.setSortOrder(++videoSort);
                         section = courseSectionRepository.save(section);
@@ -125,7 +136,6 @@ public class CourseServiceImpl implements CourseService {
                         ChapterResource resource = new ChapterResource();
                         resource.setChapter(chapter);
                         resource.setSection(section);
-                        resource.setCourse(course);
                         resource.setResourceType("video");
                         resource.setTitle(videoDTO.getTitle());
                         resource.setResourceUrl(videoDTO.getResourceUrl() != null ? videoDTO.getResourceUrl() : "");
@@ -149,7 +159,6 @@ public class CourseServiceImpl implements CourseService {
                         // 创建小节
                         CourseSection section = new CourseSection();
                         section.setChapter(chapter);
-                        section.setCourse(course);
                         section.setTitle(fileDTO.getTitle());
                         section.setSortOrder(1000 + (++fileSort));
                         section = courseSectionRepository.save(section);
@@ -158,7 +167,6 @@ public class CourseServiceImpl implements CourseService {
                         ChapterResource resource = new ChapterResource();
                         resource.setChapter(chapter);
                         resource.setSection(section);
-                        resource.setCourse(course);
                         resource.setResourceType("pdf");
                         resource.setTitle(fileDTO.getTitle());
                         resource.setResourceUrl(fileDTO.getResourceUrl() != null ? fileDTO.getResourceUrl() : "");

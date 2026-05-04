@@ -110,6 +110,24 @@ public class UserController {
             User existingUser = userService.findById(id)
                     .orElseThrow(() -> new RuntimeException("用户不存在"));
 
+            // 支持管理员修改的字段
+            if (user.getUsername() != null) {
+                existingUser.setUsername(user.getUsername());
+            }
+            if (user.getPhone() != null) {
+                existingUser.setPhone(user.getPhone());
+            }
+            if (user.getEmail() != null) {
+                existingUser.setEmail(user.getEmail());
+            }
+            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                existingUser.setPassword(user.getPassword());
+            }
+            if (user.getLevel() != null) {
+                existingUser.setLevel(user.getLevel());
+            }
+            
+            // 其他可选字段
             if (user.getNickname() != null) {
                 existingUser.setNickname(user.getNickname());
             }
@@ -192,6 +210,7 @@ public class UserController {
                 System.out.println("登录失败 - " + loginResult.getCode() + ": " + loginResult.getMessage());
                     
                 int statusCode = switch (loginResult.getCode()) {
+                    case "ACCOUNT_DISABLED" -> 403;
                     case "PASSWORD_ERROR" -> 401;
                     case "LEVEL_MISMATCH" -> 403;
                     case "USER_NOT_FOUND" -> 404;
@@ -270,6 +289,62 @@ public class UserController {
             return ResponseEntity.ok(Result.success("密码修改成功", null));
         } catch (Exception e) {
             return ResponseEntity.ok(Result.error(e.getMessage()));
+        }
+    }
+
+    // 停用/启用用户
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Result<User>> toggleUserStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, Integer> data) {
+        try {
+            User user = userService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("用户不存在"));
+
+            Integer status = data.get("status");
+            if (status == null || (status != 0 && status != 1)) {
+                return ResponseEntity.ok(Result.error(400, "无效的状态值，应为 0（正常）或 1（停用）"));
+            }
+
+            user.setStatus(status);
+            User updatedUser = userService.updateUser(id, user);
+
+            String message = status == 0 ? "用户已启用" : "用户已停用";
+            return ResponseEntity.ok(Result.success(message, updatedUser));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Result.error(400, e.getMessage()));
+        }
+    }
+
+    // 单独启用用户
+    @PutMapping("/{id}/enable")
+    public ResponseEntity<Result<User>> enableUser(@PathVariable Long id) {
+        try {
+            User user = userService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("用户不存在"));
+
+            user.setStatus(0);
+            User updatedUser = userService.updateUser(id, user);
+
+            return ResponseEntity.ok(Result.success("用户已启用", updatedUser));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Result.error(400, e.getMessage()));
+        }
+    }
+
+    // 单独停用用户
+    @PutMapping("/{id}/disable")
+    public ResponseEntity<Result<User>> disableUser(@PathVariable Long id) {
+        try {
+            User user = userService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("用户不存在"));
+
+            user.setStatus(1);
+            User updatedUser = userService.updateUser(id, user);
+
+            return ResponseEntity.ok(Result.success("用户已停用", updatedUser));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Result.error(400, e.getMessage()));
         }
     }
 }

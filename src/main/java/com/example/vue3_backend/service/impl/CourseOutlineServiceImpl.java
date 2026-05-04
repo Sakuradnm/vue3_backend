@@ -59,8 +59,10 @@ public class CourseOutlineServiceImpl implements CourseOutlineService {
             dto.setId(r.getId());
             dto.setResourceType(r.getResourceType());
             dto.setTitle(r.getTitle());
+            // fileName字段已从数据库中删除，不再设置
             dto.setResourceUrl(r.getResourceUrl());
             dto.setDuration(r.getDuration());
+            // fileSize字段已从数据库中删除，不再设置
             dto.setSortOrder(r.getSortOrder());
             
             resourceMap.computeIfAbsent(r.getSection().getId(), k -> new ArrayList<>()).add(dto);

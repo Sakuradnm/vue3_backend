@@ -54,7 +54,7 @@ public class ForumPostServiceImpl implements ForumPostService {
         } else if (category != null && !"all".equals(category)) {
             posts = forumPostRepository.findByCategory(category);
         } else {
-            posts = forumPostRepository.findAllOrderByPinnedAndScore();
+            posts = forumPostRepository.findAllOrderByPinnedAndCreatedAt();
         }
 
         List<ForumPostDTO> dtos = posts.stream()
@@ -71,7 +71,8 @@ public class ForumPostServiceImpl implements ForumPostService {
                     break;
                 case "hot":
                 default:
-                    dtos.sort(Comparator.comparingInt(ForumPostDTO::getScore).reversed());
+                    // 热度排序：按浏览量排序
+                    dtos.sort(Comparator.comparingInt(ForumPostDTO::getViews).reversed());
                     break;
             }
         }
@@ -96,7 +97,17 @@ public class ForumPostServiceImpl implements ForumPostService {
         detailDTO.setCategoryLabel(post.getCategory());
         detailDTO.setTitle(post.getTitle());
         detailDTO.setPreview(post.getPreview());
-        detailDTO.setContent(contentOpt.map(ForumPostContent::getContent).orElse(""));
+        
+        if (contentOpt.isPresent()) {
+            ForumPostContent content = contentOpt.get();
+            detailDTO.setContent(content.getContent());
+            // 设置附件信息，处理NULL值
+            String attachments = content.getAttachments();
+            detailDTO.setAttachments(attachments != null ? attachments : "[]");
+        } else {
+            detailDTO.setContent("");
+            detailDTO.setAttachments("[]");
+        }
         
         // 从关联的 User 实体获取作者信息
         if (post.getUser() != null) {
@@ -111,8 +122,6 @@ public class ForumPostServiceImpl implements ForumPostService {
         detailDTO.setViews(post.getViews());
         detailDTO.setLikes(post.getLikes());
         detailDTO.setComments(post.getComments());
-        detailDTO.setHot(post.getHot());
-        detailDTO.setScore(post.getScore());
 
         try {
             if (post.getTags() != null) {
@@ -141,7 +150,6 @@ public class ForumPostServiceImpl implements ForumPostService {
     public void incrementLikes(Integer id) {
         forumPostRepository.findById(id).ifPresent(post -> {
             post.setLikes(post.getLikes() + 1);
-            post.setScore(post.getScore() + 1);
             forumPostRepository.save(post);
         });
     }
@@ -188,7 +196,6 @@ public class ForumPostServiceImpl implements ForumPostService {
             
             // 更新帖子点赞数
             post.setLikes(post.getLikes() + 1);
-            post.setScore(post.getScore() + 1);
             forumPostRepository.save(post);
             return true;
             
@@ -203,7 +210,6 @@ public class ForumPostServiceImpl implements ForumPostService {
             
             // 更新帖子点赞数
             post.setLikes(Math.max(0, post.getLikes() - 1));
-            post.setScore(Math.max(0, post.getScore() - 1));
             forumPostRepository.save(post);
             return false;
             
@@ -213,7 +219,6 @@ public class ForumPostServiceImpl implements ForumPostService {
                 // 已点赞，取消点赞
                 forumPostLikeRepository.deleteByPostIdAndUserId(postId, userId);
                 post.setLikes(Math.max(0, post.getLikes() - 1));
-                post.setScore(Math.max(0, post.getScore() - 1));
                 forumPostRepository.save(post);
                 return false;
             } else {
@@ -221,7 +226,6 @@ public class ForumPostServiceImpl implements ForumPostService {
                 ForumPostLike like = new ForumPostLike(postId, userId);
                 forumPostLikeRepository.save(like);
                 post.setLikes(post.getLikes() + 1);
-                post.setScore(post.getScore() + 1);
                 forumPostRepository.save(post);
                 return true;
             }
@@ -239,7 +243,19 @@ public class ForumPostServiceImpl implements ForumPostService {
     public ForumPostDTO createPost(Map<String, Object> postData) {
         // 创建帖子实体
         ForumPost post = new ForumPost();
-        post.setUserId((Integer) postData.get("userId"));
+        
+        // 处理 userId：前端可能传递 Integer 或 Long，需要转换为 Integer
+        Object userIdObj = postData.get("userId");
+        Integer userId;
+        if (userIdObj instanceof Integer) {
+            userId = (Integer) userIdObj;
+        } else if (userIdObj instanceof Long) {
+            userId = ((Long) userIdObj).intValue();
+        } else {
+            userId = Integer.valueOf(userIdObj.toString());
+        }
+        post.setUserId(userId);
+        
         post.setCategory((String) postData.get("category"));
         post.setTitle((String) postData.get("title"));
         post.setPreview((String) postData.get("preview"));
@@ -255,21 +271,31 @@ public class ForumPostServiceImpl implements ForumPostService {
             post.setTags("[]");
         }
         
-        post.setHot(false);
-        post.setScore(0);
         post.setViews(0);
 
         // 保存帖子
         ForumPost savedPost = forumPostRepository.save(post);
         
-        // 更新发帖总数统计
-        statisticsService.updatePostCount();
+        // TODO: 更新发帖总数统计（需要 statistics_overview 表）
+        // statisticsService.updatePostCount();
         
         // 如果有内容，保存到 forum_post_contents 表
         if (postData.get("content") != null && !((String) postData.get("content")).isEmpty()) {
             ForumPostContent content = new ForumPostContent();
             content.setPostId(savedPost.getId());
             content.setContent((String) postData.get("content"));
+            
+            // 保存附件信息
+            if (postData.get("attachments") != null) {
+                try {
+                    content.setAttachments(objectMapper.writeValueAsString(postData.get("attachments")));
+                } catch (Exception e) {
+                    content.setAttachments("[]");
+                }
+            } else {
+                content.setAttachments("[]");
+            }
+            
             forumPostContentRepository.save(content);
         }
         
@@ -298,8 +324,6 @@ public class ForumPostServiceImpl implements ForumPostService {
         dto.setViews(post.getViews());
         dto.setLikes(post.getLikes());
         dto.setComments(post.getComments());
-        dto.setHot(post.getHot());
-        dto.setScore(post.getScore());
         dto.setTimeAgo(calculateTimeAgo(post.getCreatedAt()));
 
         try {

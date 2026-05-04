@@ -105,4 +105,16 @@ public class ForumCommentController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
+    
+    // 根据ID获取评论信息
+    @GetMapping("/comments/{id}")
+    public ResponseEntity<ForumCommentDTO> getCommentById(@PathVariable Integer id) {
+        try {
+            ForumCommentDTO comment = forumCommentService.getCommentById(id);
+            return ResponseEntity.ok(comment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

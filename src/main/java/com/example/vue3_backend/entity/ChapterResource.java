@@ -26,9 +26,7 @@ public class ChapterResource {
     @JoinColumn(name = "section_id", nullable = false)
     private CourseSection section;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    // 注意：数据库表course_chapters3中没有course_id字段，只通过chapter_id和section_id关联
 
     @Column(name = "resource_type", length = 20, nullable = false)
     private String resourceType;
@@ -36,11 +34,20 @@ public class ChapterResource {
     @Column(name = "title", length = 200, nullable = false)
     private String title;
 
+    // fileName字段已从数据库中删除，使用Transient标记不映射到数据库
+    @Transient
+    private String fileName;
+
     @Column(name = "resource_url", columnDefinition = "TEXT", nullable = false)
     private String resourceUrl;
 
-    @Column(name = "duration")
+    // duration字段已从数据库中删除，使用Transient标记不映射到数据库
+    @Transient
     private Integer duration = 0;
+
+    // fileSize字段已从数据库中删除，使用Transient标记不映射到数据库
+    @Transient
+    private Long fileSize;
 
     @Column(name = "sort_order")
     private Integer sortOrder = 0;

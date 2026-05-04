@@ -47,6 +47,8 @@ public class CourseDetail {
     @Column(name = "instructor", length = 200)
     private String instructor;
 
+
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

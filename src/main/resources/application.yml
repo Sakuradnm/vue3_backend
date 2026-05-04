@@ -8,6 +8,13 @@ spring:
     password: 3280461477xjn
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 500MB      # 单个文件最大大小
+      max-request-size: 500MB   # 请求最大大小
+      enabled: true
+
   jpa:
     hibernate:
       ddl-auto: update  # update: 自动更新表结构 | validate: 仅验证 | create: 每次启动重新创建

@@ -31,4 +31,27 @@ public class Course {
 
     @Column(name = "sort_order")
     private Integer sortOrder = 0;
+
+    // 课程状态: 0-正常（上架）, 1-下架
+    @Column(name = "status")
+    private Integer status = 0;
+
+    // 统计字段（用于优化课程列表页性能）
+    @Column(name = "rating_avg")
+    private Double ratingAvg = 0.0;  // 课程平均评分(0-5)
+
+    @Column(name = "rating_count")
+    private Integer ratingCount = 0;  // 评分总数
+
+    @Column(name = "chapter_count")
+    private Integer chapterCount = 0;  // 章节数
+
+    @Column(name = "video_count")
+    private Integer videoCount = 0;  // 视频节数
+
+    @Column(name = "total_sections")
+    private Integer totalSections = 0;  // 总课时数
+
+    @Column(name = "students_count")
+    private Integer studentsCount = 0;  // 学习人数(从user_course_study统计)
 }

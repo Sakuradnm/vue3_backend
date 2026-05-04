@@ -53,8 +53,8 @@ public class UserServiceImpl implements UserService {
         
         User savedUser = userRepository.save(user);
         
-        // 更新用户总数统计
-        statisticsService.updateUserCount();
+        // TODO: 更新用户总数统计（需要 statistics_overview 表）
+        // statisticsService.updateUserCount();
         
         return savedUser;
     }
@@ -104,8 +104,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
-        // 更新用户总数统计
-        statisticsService.updateUserCount();
+        // TODO: 更新用户总数统计（需要 statistics_overview 表）
+        // statisticsService.updateUserCount();
     }
 
     @Override
@@ -123,6 +123,11 @@ public class UserServiceImpl implements UserService {
         
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+            
+            // 检查用户状态：如果已停用，则不允许登录
+            if (user.getStatus() != null && user.getStatus() == 1) {
+                return new UserService.LoginResult(false, "ACCOUNT_DISABLED", "该账号已停用，请联系管理员", null);
+            }
             
             if (!user.getPassword().equals(password)) {
                 return new UserService.LoginResult(false, "PASSWORD_ERROR", "密码错误", null);

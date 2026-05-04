@@ -50,10 +50,4 @@ public class ForumPost {
 
     @Column(name = "tags", columnDefinition = "JSON")
     private String tags;
-
-    @Column(name = "hot")
-    private Boolean hot = false;
-
-    @Column(name = "score")
-    private Integer score = 0;
 }

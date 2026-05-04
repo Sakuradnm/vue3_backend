@@ -10,7 +10,8 @@ import lombok.AllArgsConstructor;
 public class ForumCategoryDTO {
     private Integer id;
     private String categoryId;
-    private String label;
+    private String name;
     private String color;
     private Integer sortOrder;
+    private Integer mainCategoryId;
 }

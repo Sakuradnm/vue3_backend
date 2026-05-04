@@ -22,12 +22,17 @@ public class CourseSection {
     @JoinColumn(name = "chapter_id", nullable = false)
     private CourseChapter chapter;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    // 注意：数据库表course_chapters2中没有course_id字段，只通过chapter_id关联
 
     @Column(name = "title", length = 200, nullable = false)
     private String title;
+
+    @Column(name = "section_type", length = 20)
+    private String sectionType;
+
+    // duration字段已从数据库中删除，使用Transient标记不映射到数据库
+    @Transient
+    private String duration;
 
     @Column(name = "sort_order")
     private Integer sortOrder = 0;
