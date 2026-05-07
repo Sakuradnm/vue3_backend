@@ -6,6 +6,7 @@ import com.example.vue3_backend.dto.CourseUploadDTO;
 import com.example.vue3_backend.service.impl.CourseServiceImpl;
 import com.example.vue3_backend.service.CourseDetailService;
 import com.example.vue3_backend.service.CourseReviewService;
+import com.example.vue3_backend.service.CourseStatisticsService;
 import com.example.vue3_backend.common.Result;
 import com.example.vue3_backend.entity.User;
 import com.example.vue3_backend.entity.Course;
@@ -42,6 +43,9 @@ public class CourseController {
 
     @Autowired
     private UserCourseStudyRepository userCourseStudyRepository;
+
+    @Autowired
+    private CourseStatisticsService courseStatisticsService;
 
     @GetMapping
     public List<CourseDTO> getAllCourses() {
@@ -128,6 +132,14 @@ public class CourseController {
             study.setCourse(courseOpt.get());
             study.setProgressPercent(0.0);
             userCourseStudyRepository.save(study);
+
+            // 更新课程学员人数统计
+            try {
+                courseStatisticsService.updateCourseStudentsCount(courseId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                // 统计更新失败不影响主流程
+            }
 
             Map<String, Object> result = new HashMap<>();
             result.put("alreadyEnrolled", false);

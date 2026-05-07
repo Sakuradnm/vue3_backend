@@ -1,6 +1,7 @@
 package com.example.vue3_backend.controller;
 
 import com.example.vue3_backend.common.Result;
+import com.example.vue3_backend.service.CourseStatisticsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,6 +18,9 @@ public class CourseRatingController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private CourseStatisticsService courseStatisticsService;
 
     /**
      * 获取课程的所有评分/评论
@@ -100,6 +104,14 @@ public class CourseRatingController {
                 Long newId = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
                 result.put("id", newId);
                 result.put("message", "评论发布成功");
+                
+                // 更新课程评分统计
+                try {
+                    courseStatisticsService.updateCourseRatingStatistics(courseId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // 统计更新失败不影响主流程
+                }
             }
 
             // 返回完整的评论信息
@@ -187,8 +199,8 @@ public class CourseRatingController {
                 return ResponseEntity.ok(Result.error("用户ID无效"));
             }
 
-            // 检查评论是否存在
-            String checkSql = "SELECT id, user_id FROM course_ratings WHERE id = ?";
+            // 检查评论是否存在，同时获取course_id
+            String checkSql = "SELECT id, user_id, course_id FROM course_ratings WHERE id = ?";
             List<Map<String, Object>> ratingList = jdbcTemplate.queryForList(checkSql, ratingId);
             if (ratingList.isEmpty()) {
                 return ResponseEntity.ok(Result.error("评论不存在"));
@@ -201,6 +213,10 @@ public class CourseRatingController {
                 return ResponseEntity.ok(Result.error("您只能删除自己的评论"));
             }
 
+            // 获取course_id，用于后续更新统计
+            Object courseIdObj = ratingList.get(0).get("course_id");
+            Integer courseId = courseIdObj != null ? ((Number) courseIdObj).intValue() : null;
+
             // 先删除相关的点赞记录
             String deleteLikesSql = "DELETE FROM course_rating_likes WHERE rating_id = ?";
             jdbcTemplate.update(deleteLikesSql, ratingId);
@@ -208,6 +224,16 @@ public class CourseRatingController {
             // 删除评论
             String deleteSql = "DELETE FROM course_ratings WHERE id = ?";
             jdbcTemplate.update(deleteSql, ratingId);
+
+            // 更新课程评分统计
+            try {
+                if (courseId != null) {
+                    courseStatisticsService.updateCourseRatingStatistics(courseId);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                // 统计更新失败不影响主流程
+            }
 
             return ResponseEntity.ok(Result.success("评论删除成功"));
         } catch (Exception e) {

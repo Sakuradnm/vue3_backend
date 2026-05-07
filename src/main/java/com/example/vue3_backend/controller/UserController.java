@@ -114,12 +114,31 @@ public class UserController {
             if (user.getUsername() != null) {
                 existingUser.setUsername(user.getUsername());
             }
+            
+            // 验证并更新手机号
             if (user.getPhone() != null) {
-                existingUser.setPhone(user.getPhone());
+                String phone = user.getPhone().trim();
+                if (!phone.isEmpty()) {
+                    // 验证手机号格式（中国大陆11位手机号）
+                    if (!phone.matches("^1[3-9]\\d{9}$")) {
+                        return ResponseEntity.ok(Result.error(400, "请输入正确的11位手机号"));
+                    }
+                    existingUser.setPhone(phone);
+                }
             }
+            
+            // 验证并更新邮箱
             if (user.getEmail() != null) {
-                existingUser.setEmail(user.getEmail());
+                String email = user.getEmail().trim();
+                if (!email.isEmpty()) {
+                    // 验证邮箱格式
+                    if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+                        return ResponseEntity.ok(Result.error(400, "请输入正确的邮箱格式"));
+                    }
+                    existingUser.setEmail(email);
+                }
             }
+            
             if (user.getPassword() != null && !user.getPassword().isEmpty()) {
                 existingUser.setPassword(user.getPassword());
             }
